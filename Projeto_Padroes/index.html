@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Central de Operações</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">C</span><span>Central</span></div>
+    <nav aria-label="Navegação principal">
+      <a class="nav-item active" href="#visao-geral"><span class="nav-icon">⌂</span>Visão geral</a>
+      <a class="nav-item" href="#pagamentos"><span class="nav-icon">◎</span>Pagamentos</a>
+      <a class="nav-item" href="#pedidos"><span class="nav-icon">▣</span>Pedidos</a>
+      <a class="nav-item" href="#notificacoes"><span class="nav-icon">♧</span>Notificações</a>
+    </nav>
+    <div class="sidebar-status"><span class="status-dot"></span>Sistema operacional</div>
+  </aside>
+
+  <main class="app">
+    <header class="topbar" id="visao-geral">
+      <div><p class="eyebrow">Painel administrativo</p><h1>Central de Operações</h1></div>
+      <div class="topbar-actions">
+        <div class="environment">Ambiente de demonstração</div>
+        <button class="icon-button" id="btn-limpar" type="button" title="Limpar registros">⌫</button>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <div class="cards">
+        <section class="card" id="pagamentos">
+          <div class="card-header">
+            <div><p class="card-kicker">Recebimentos</p><h2>Registrar pagamento</h2></div>
+            <span class="card-icon">R$</span>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="metodo">Forma de pagamento</label>
+              <select id="metodo">
+                <option value="pix">PIX</option>
+                <option value="cartao">Cartão de crédito</option>
+                <option value="debito">Cartão de débito</option>
+                <option value="boleto">Boleto bancário</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="valor">Valor da venda</label>
+              <div class="input-prefix"><span>R$</span><input id="valor" type="number" step="0.01" min="0.01" value="150.00"></div>
+            </div>
+          </div>
+          <button class="primary" id="btn-pagar"><span>Finalizar pagamento</span><span aria-hidden="true">→</span></button>
+        </section>
+
+        <section class="card" id="notificacoes">
+          <div class="card-header">
+            <div><p class="card-kicker">Comunicação</p><h2>Notificar cliente</h2></div>
+            <span class="card-icon">SMS</span>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="cod-sms">Código do pedido</label>
+              <input id="cod-sms" value="PED-1024" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="tel">Telefone</label>
+              <input id="tel" value="+5545999990000" autocomplete="tel">
+            </div>
+          </div>
+          <button class="secondary" id="btn-sms"><span>Enviar confirmação por SMS</span><span aria-hidden="true">→</span></button>
+        </section>
+
+        <section class="card card-wide" id="pedidos">
+          <div class="card-header">
+            <div><p class="card-kicker">Logística</p><h2>Acompanhamento do pedido</h2></div>
+            <span class="status status-pendente" id="ped-status" hidden>PENDENTE</span>
+          </div>
+          <div class="order-row">
+            <div class="field">
+              <label for="cod-ped">Código do pedido</label>
+              <input id="cod-ped" value="PED-2048" autocomplete="off">
+            </div>
+            <button class="secondary compact" id="btn-criar">Criar pedido</button>
+          </div>
+          <div class="order-summary">
+            <div><span class="summary-label">Pedido selecionado</span><strong id="ped-atual">Nenhum pedido criado</strong></div>
+            <div class="observer-controls" aria-label="Atualizações automáticas">
+              <span class="summary-label">Atualizações</span>
+              <label><input type="checkbox" data-obs="estoque" checked disabled> Estoque</label>
+              <label><input type="checkbox" data-obs="auditoria" checked disabled> Auditoria</label>
+            </div>
+          </div>
+          <div>
+            <span class="summary-label">Atualizar situação</span>
+            <div class="status-actions" id="botoes-status">
+              <button class="status-button" data-status="PAGO">Pago</button>
+              <button class="status-button" data-status="EM_PROCESSAMENTO">Em processamento</button>
+              <button class="status-button" data-status="ENVIADO">Enviado</button>
+              <button class="status-button" data-status="ENTREGUE">Entregue</button>
+              <button class="status-button danger" data-status="CANCELADO">Cancelar pedido</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="activity" aria-live="polite">
+        <div class="activity-header">
+          <div><p class="card-kicker">Monitoramento</p><h2>Atividades recentes</h2></div>
+          <span class="live"><span></span> Ao vivo</span>
+        </div>
+        <pre id="log"><span class="vazio">Nenhuma operação registrada.<br>Selecione uma ação no painel.</span></pre>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const log = $("log");
+
+    function escrever(linhas, tipo = "") {
+      if (log.querySelector(".vazio")) log.innerHTML = "";
+      linhas.forEach(texto => {
+        const linha = document.createElement("span");
+        linha.className = "log-line " + tipo;
+        linha.textContent = texto;
+        log.appendChild(linha);
+      });
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function chamar(rota, corpo) {
+      try {
+        const resposta = await fetch(rota, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo) });
+        const dados = await resposta.json();
+        if (!resposta.ok) {
+          escrever([dados.erro || "Não foi possível concluir a operação."], "erro");
+          return null;
+        }
+        return dados;
+      } catch {
+        escrever(["Não foi possível conectar ao servidor."], "erro");
+        return null;
+      }
+    }
+
+    function mostrarPedido(pedido) {
+      $("ped-atual").textContent = pedido.codigo || "Nenhum pedido criado";
+      const status = $("ped-status");
+      status.hidden = !pedido.status;
+      status.textContent = pedido.status || "";
+      status.className = "status " + (pedido.status ? "status-" + pedido.status.toLowerCase().replaceAll("_", "-") : "");
+      document.querySelectorAll("[data-obs]").forEach(checkbox => {
+        checkbox.disabled = !pedido.codigo;
+        checkbox.checked = pedido.observadores[checkbox.dataset.obs];
+      });
+    }
+
+    $("btn-pagar").onclick = async () => {
+      const dados = await chamar("/api/pagamento", { metodo: $("metodo").value, valor: $("valor").value });
+      if (dados) escrever(dados.log, dados.aprovado ? "ok" : "erro");
+    };
+    $("btn-sms").onclick = async () => {
+      const dados = await chamar("/api/notificar", { codigo: $("cod-sms").value, telefone: $("tel").value });
+      if (dados) escrever(dados.log);
+    };
+    $("btn-criar").onclick = async () => {
+      const dados = await chamar("/api/pedido/criar", { codigo: $("cod-ped").value });
+      if (dados) {
+        mostrarPedido(dados.pedido);
+        escrever([`Pedido ${dados.pedido.codigo} criado com sucesso.`, "Situação atual: PENDENTE"]);
+      }
+    };
+    $("botoes-status").onclick = async evento => {
+      const botao = evento.target.closest("[data-status]");
+      if (!botao) return;
+      const dados = await chamar("/api/pedido/status", { status: botao.dataset.status });
+      if (dados) {
+        mostrarPedido(dados.pedido);
+        escrever(dados.log.length ? dados.log : ["Situação atualizada sem novos registros."]);
+      }
+    };
+    document.querySelectorAll("[data-obs]").forEach(checkbox => {
+      checkbox.onchange = async () => {
+        const dados = await chamar("/api/pedido/observador", { nome: checkbox.dataset.obs, ativo: checkbox.checked });
+        if (dados) mostrarPedido(dados.pedido);
+      };
+    });
+    $("btn-limpar").onclick = () => { log.innerHTML = '<span class="vazio">Registros limpos.<br>Aguardando nova operação.</span>'; };
+    fetch("/api/pedido").then(resposta => resposta.json()).then(mostrarPedido);
+  </script>
+</body>
+</html>
